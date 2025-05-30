@@ -123,4 +123,31 @@ void shutdown_pool(pthread_t threads[]){
   pthread_mutex_unlock(&lock);
 }
 
-int main(int argc, char *argv[]) { return EXIT_SUCCESS; }
+void handle_client(void *arg){
+  int* client_fd_prt = (int*)arg;
+  int client_fd = *client_fd_prt;
+  free(client_fd_prt);
+
+  char buffer[buffer_size];
+  int bytes_read = read(client_fd, buffer,buffer_size - 1);
+  if (bytes_read <= 0) {
+    printf("Client %d disconnected\n",client_fd);
+    remove_client(client_fd);
+    close(client_fd);
+    return;
+  }   
+   buffer[bytes_read] = '\0';
+  printf("Thread %ld reacived from client %d: %s\n",pthread_self(), client_fd,buffer);
+   brodcast_message(buffer,client_fd);
+}
+
+int main(int argc, char *argv[]) { 
+  pthread_t thread[thread_count];
+  int server_fd;
+  struct sockaddr_in server_addr;
+  //initialize the mutex and cond
+  pthread_mutex_init(&lock,NULL);
+  pthread_cond_init(&cond,NULL);
+
+  return EXIT_SUCCESS; 
+}
