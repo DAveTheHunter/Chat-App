@@ -71,4 +71,22 @@ void brodcast_message(const char *message, int sender_fd) {
   pthread_mutex_unlock(&client_lock);
 }
 
+void* worker(void* arg){
+  while (1) {
+    pthread_mutex_lock(&lock);
+    while (task_count == 0 && !shutdowns) {
+      pthread_cond_wait(&cond,&lock);
+    }
+    if (shutdowns && task_count == 0) {
+       pthread_mutex_unlock(&lock);
+      break;
+    }
+    Task task = tasks[head];
+    head = (head + 1) % size;
+    task_count--;
+    pthread_mutex_unlock(&lock);
+    task.function(task.arg);
+  }  
+}
+
 int main(int argc, char *argv[]) { return EXIT_SUCCESS; }
