@@ -87,6 +87,40 @@ void* worker(void* arg){
     pthread_mutex_unlock(&lock);
     task.function(task.arg);
   }  
+  return NULL;
+}
+
+void submit_task(void(*function)(void*),void* arg){
+  pthread_mutex_lock(&lock);
+  if (task_count >= size) {
+    printf("maximum capacity\n");
+    pthread_mutex_unlock(&lock);
+    free(arg);
+    return;
+  }
+  tasks[tail].function = function;
+  tasks[tail].arg= arg;
+  tail = (tail + 1) % size;
+  task_count++;
+  pthread_cond_signal(&cond);
+  pthread_mutex_unlock(&lock);
+}
+
+void shutdown_pool(pthread_t threads[]){
+  pthread_mutex_lock(&lock);
+  shutdowns = true;
+  pthread_cond_broadcast(&cond);
+  pthread_mutex_unlock(&lock);
+  for (int i = 0;i < thread_count;i++) {
+    pthread_join(threads[i], NULL);
+  }
+  //close all the client sockets 
+  pthread_mutex_lock(&lock);
+  for(int i = 0;i < clients_count;i++){
+    close(clients[i]);
+  }
+  clients_count = 0;
+  pthread_mutex_unlock(&lock);
 }
 
 int main(int argc, char *argv[]) { return EXIT_SUCCESS; }
