@@ -158,9 +158,44 @@ int main(int argc, char *argv[]) {
   if (server_fd < 0) {
     printf("Socker formation failed\n");
     shutdown_pool(thread);
+    pthread_mutex_destroy(&client_lock);
     pthread_mutex_destroy(&lock);
     pthread_cond_destroy(&cond);
     return EXIT_FAILURE; 
   }
+  //set options
+  int opt = 1;
+  if (setsockopt(server_fd, SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt)) < 0) {
+    printf("Error setting options\n");
+    close(server_fd);
+    shutdown_pool(thread);
+    pthread_mutex_destroy(&client_lock);
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&cond);
+    return EXIT_FAILURE; 
+  }
+  //Bind and listen
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = INADDR_ANY;
+  server_addr.sin_port = htons(port);
+  if (bind(server_fd,(struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
+    printf("Bind was not succesful\n");
+    close(server_fd);
+    shutdown_pool(thread);
+    pthread_mutex_destroy(&client_lock);
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&cond);
+    return EXIT_FAILURE; 
+  }
+  if (listen(server_fd, 10) < 0) {
+    printf("Linsten unsuccesful\n");
+    close(server_fd);
+    shutdown_pool(thread);
+    pthread_mutex_destroy(&client_lock);
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&cond);
+    return EXIT_FAILURE; 
+  }
+  printf("⚡server listening at port %d\n",port);
   return EXIT_SUCCESS; 
 }
