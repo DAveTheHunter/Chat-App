@@ -149,5 +149,18 @@ int main(int argc, char *argv[]) {
   pthread_mutex_init(&lock,NULL);
   pthread_cond_init(&cond,NULL);
 
+  //create a worker thread
+  for (int i = 0;i < thread_count;i++) {
+    pthread_create(&thread[i],NULL,worker,NULL);
+  }
+  //create a server socket 
+  server_fd = socket(AF_INET,SOCK_STREAM,0);
+  if (server_fd < 0) {
+    printf("Socker formation failed\n");
+    shutdown_pool(thread);
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&cond);
+    return EXIT_FAILURE; 
+  }
   return EXIT_SUCCESS; 
 }
