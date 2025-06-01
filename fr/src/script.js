@@ -8,7 +8,7 @@ ws.onopen = () => {
 };
 
 ws.onmessage = () => {
-  appendMessage(`server : ${event.data}`);
+  appendMessage(`client : ${event.data}`);
 };
 
 ws.onerror = (error) => {
