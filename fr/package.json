@@ -1,0 +1,16 @@
+{
+  "name": "fr",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "DAveTheHUnter",
+  "type": "commonjs",
+  "main": "tcp_client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "ws": "^8.18.2"
+  }
+}

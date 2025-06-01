@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Chater 😁</h1>
+    <div id="messages"></div>
+    <input type="text" id="input" placeholder="Type your message" />
+    <button id="button">Send something</button>
+    <script>
+      const ws = new WebSocket('ws://localhost:8001');
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('input');
+
+        ws.onopen = () => {
+            appendMessage('Connected to chat server! 🎉');
+        };
+
+        ws.onmessage = (event) => {
+            appendMessage(`Server: ${event.data}`);
+        };
+
+        ws.onerror = (error) => {
+            appendMessage(`Error: ${error.message} 😕`);
+        };
+
+        ws.onclose = () => {
+            appendMessage('Disconnected from server. Peac(e out! ✌️');
+        };
+
+        function sendMessage() {
+            const message = input.value.trim();
+            if (message) {
+                if (message.toLowerCase() === 'quit') {
+                    ws.close();
+                    return;
+                }
+                ws.send(message);
+                input.value = '';
+            }
+        }
+
+        function appendMessage(text) {
+            const p = document.createElement('p');
+            p.textContent = text;
+            messagesDiv.appendChild(p);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Send message on Enter key
+        input.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+  </body>
+</html>
